@@ -1,1 +1,363 @@
 
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceFlow Personal Report</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --bg-color: #0F172A;
+            --card-bg: #1E293B;
+            --accent-primary: #3B82F6;
+            --accent-success: #10B981;
+            --accent-danger: #EF4444;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: var(--accent-primary);
+            font-size: 1.8rem;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-item h3 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .summary-item p {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .income-text { color: var(--accent-success); }
+        .expense-text { color: var(--accent-danger); }
+
+        .form-card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background: #0F172A;
+            color: #FFF;
+            font-size: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--accent-success);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #334155;
+            color: var(--text-main);
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+
+        .history-card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .history-list {
+            list-style: none;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: var(--accent-primary);
+            border-bottom: 2px solid var(--accent-primary);
+            display: inline-block;
+            padding-bottom: 4px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>FinanceFlow Personal Report</h1>
+    </header>
+
+    <!-- Summary Balance -->
+    <div class="summary-card">
+        <div class="summary-item">
+            <h3>آمدنی (Income)</h3>
+            <p class="income-text" id="total-income">RS 0</p>
+        </div>
+        <div class="summary-item">
+            <h3>اخراجات (Expense)</h3>
+            <p class="expense-text" id="total-expense">RS 0</p>
+        </div>
+        <div class="summary-item">
+            <h3>بقیہ (Balance)</h3>
+            <p id="total-balance">RS 0</p>
+        </div>
+    </div>
+
+    <!-- Entry Form -->
+    <div class="form-card">
+        <h2 class="section-title">نئی انٹری کریں</h2>
+        <div class="form-group">
+            <label>تفصیل (Description)</label>
+            <input type="text" id="desc" placeholder="مثلاً: تنخواہ، راشن">
+        </div>
+        <div class="form-group">
+            <label>رقم (Amount)</label>
+            <input type="number" id="amount" placeholder="0">
+        </div>
+        <div class="form-group">
+            <label>قسم (Type)</label>
+            <select id="type">
+                <option value="income">آمدنی (Income)</option>
+                <option value="expense">خرچ (Expense)</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="addTransaction()">شامل کریں</button>
+    </div>
+
+    <!-- History -->
+    <div class="history-card">
+        <h2 class="section-title">ٹرانزیکشن کی ہسٹری</h2>
+        <ul class="history-list" id="transaction-list"></ul>
+    </div>
+
+    <!-- Data Backup & Support Tools -->
+    <div class="form-card">
+        <h2 class="section-title">ڈیٹا بیک اپ اور سپورٹ</h2>
+        
+        <!-- Backup Section -->
+        <div class="grid-2" style="margin-bottom: 12px;">
+            <button class="btn btn-success" onclick="exportCSV()">Export CSV (بیک اپ)</button>
+            <button class="btn btn-outline" onclick="document.getElementById('csv-file').click()">Import CSV (بحال)</button>
+            <input type="file" id="csv-file" class="file-input" accept=".csv" onchange="importCSV(event)">
+        </div>
+
+        <!-- Feedback & WhatsApp Section -->
+        <div class="grid-2">
+            <button class="btn btn-whatsapp" onclick="openWhatsApp()">WhatsApp رابطہ</button>
+            <button class="btn btn-outline" onclick="openGoogleForm()">رائے / Feedback</button>
+        </div>
+    </div>
+
+    <script>
+        const WHATSAPP_NUMBER = "923045544649"; 
+        const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScKYX-PGrE1e5DkpUEDCmbJIC7GMngNt1apFbZNFIvJ5LQfiQ/viewform?usp=dialog";
+
+        let transactions = JSON.parse(localStorage.getItem('ff_personal_transactions')) || [];
+
+        function updateUI() {
+            const list = document.getElementById('transaction-list');
+            list.innerHTML = '';
+
+            let income = 0;
+            let expense = 0;
+
+            transactions.forEach((item) => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                
+                const val = parseFloat(item.amount);
+                if (item.type === 'income') income += val;
+                else expense += val;
+
+                li.innerHTML = `
+                    <span>${item.desc}</span>
+                    <span class="${item.type === 'income' ? 'income-text' : 'expense-text'}">
+                        ${item.type === 'income' ? '+' : '-'} RS ${val}
+                    </span>
+                `;
+                list.appendChild(li);
+            });
+
+            document.getElementById('total-income').innerText = `RS ${income}`;
+            document.getElementById('total-expense').innerText = `RS ${expense}`;
+            document.getElementById('total-balance').innerText = `RS ${income - expense}`;
+
+            localStorage.setItem('ff_personal_transactions', JSON.stringify(transactions));
+        }
+
+        function addTransaction() {
+            const desc = document.getElementById('desc').value.trim();
+            const amount = document.getElementById('amount').value.trim();
+            const type = document.getElementById('type').value;
+
+            if (!desc || !amount) {
+                alert('براہ کرم تمام تفصیلات درج کریں!');
+                return;
+            }
+
+            transactions.push({ desc, amount: parseFloat(amount), type });
+            document.getElementById('desc').value = '';
+            document.getElementById('amount').value = '';
+            updateUI();
+        }
+
+        function exportCSV() {
+            if (transactions.length === 0) {
+                alert('ڈیٹا بیس میں کوئی انٹری موجود نہیں ہے!');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Description,Amount,Type\n";
+            transactions.forEach(t => {
+                csvContent += `"${t.desc}",${t.amount},${t.type}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `FinancePersonal_Backup_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split('\n');
+                let imported = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line) {
+                        const parts = line.split(',');
+                        if (parts.length >= 3) {
+                            const desc = parts[0].replace(/"/g, '');
+                            const amount = parseFloat(parts[1]);
+                            const type = parts[2].trim();
+                            if (desc && !isNaN(amount)) {
+                                imported.push({ desc, amount, type });
+                            }
+                        }
+                    }
+                }
+
+                if (imported.length > 0) {
+                    transactions = imported;
+                    updateUI();
+                    alert('ڈیٹا کامیابی سے بحال (Restore) ہو گیا ہے!');
+                } else {
+                    alert('فائل کا فارمیٹ درست نہیں ہے!');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function openWhatsApp() {
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=سلام!%20میں%20FinanceFlow%20Personal%20Report%20کے%20بارے%20میں%20رابطہ%20کرنا%20چاہता%20ہوں۔`, '_blank');
+        }
+
+        function openGoogleForm() {
+            window.open(GOOGLE_FORM_URL, '_blank');
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
