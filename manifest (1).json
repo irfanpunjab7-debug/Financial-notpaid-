@@ -1,0 +1,26 @@
+{
+  "name": "FinanceFlow Personal Report",
+  "short_name": "FinanceReport",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#1E293B",
+  "share_target": {
+    "method": "GET",
+    "action": "https://irfanpunjab7-debug.github.io/Financial-notpaid-/",
+    "params": {
+      "title": "Financial ",
+      "url": "https://irfanpunjab7-debug.github.io/Financial-notpaid-/",
+      "files": [
+        {
+          "name": "",
+          "accept": []
+        },
+        {
+          "name": "",
+          "accept": []
+        }
+      ]
+    }
+  }
+}
