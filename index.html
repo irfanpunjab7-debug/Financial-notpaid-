@@ -1,313 +1,993 @@
-
 <!DOCTYPE html>
 <html lang="ur" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <link rel="manifest" href="./manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinanceFlow Personal Report</title>
-    <link rel="manifest" href="manifest.json">
-    <style>
-        :root {
-            --bg-color: #0F172A;
-            --card-bg: #1E293B;
-            --accent-primary: #3B82F6;
-            --accent-success: #10B981;
-            --accent-danger: #EF4444;
-            --text-main: #F8FAFC;
-            --text-muted: #94A3B8;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding: 16px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #334155;
-            margin-bottom: 20px;
-        }
-
-        header h1 {
-            color: var(--accent-primary);
-            font-size: 1.8rem;
-        }
-
-        .summary-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-        }
-
-        .summary-item {
-            text-align: center;
-        }
-
-        .summary-item h3 {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
-
-        .summary-item p {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        .income-text { color: var(--accent-success); }
-        .expense-text { color: var(--accent-danger); }
-
-        .form-card {
-            background: var(--card-bg);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #334155;
-            background: #0F172A;
-            color: #FFF;
-            font-size: 1rem;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-primary {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .btn-success {
-            background: var(--accent-success);
-            color: white;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #334155;
-            color: var(--text-main);
-        }
-
-        .btn-whatsapp {
-            background: #25D366;
-            color: white;
-        }
-
-        .history-card {
-            background: var(--card-bg);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        .history-list {
-            list-style: none;
-            max-height: 250px;
-            overflow-y: auto;
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #334155;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            color: var(--accent-primary);
-            border-bottom: 2px solid var(--accent-primary);
-            display: inline-block;
-            padding-bottom: 4px;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .file-input {
-            display: none;
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>FinanceFlow Personal Report</h1>
-    </header>
-
-    <!-- Summary Balance -->
-    <div class="summary-card">
-        <div class="summary-item">
-            <h3>آمدنی (Income)</h3>
-            <p class="income-text" id="total-income">RS 0</p>
-        </div>
-        <div class="summary-item">
-            <h3>اخراجات (Expense)</h3>
-            <p class="expense-text" id="total-expense">RS 0</p>
-        </div>
-        <div class="summary-item">
-            <h3>بقیہ (Balance)</h3>
-            <p id="total-balance">RS 0</p>
-        </div>
-    </div>
-
-    <!-- Entry Form -->
-    <div class="form-card">
-        <h2 class="section-title">نئی انٹری کریں</h2>
-        <div class="form-group">
-            <label>تفصیل (Description)</label>
-            <input type="text" id="desc" placeholder="مثلاً: تنخواہ، راشن">
-        </div>
-        <div class="form-group">
-            <label>رقم (Amount)</label>
-            <input type="number" id="amount" placeholder="0">
-        </div>
-        <div class="form-group">
-            <label>قسم (Type)</label>
-            <select id="type">
-                <option value="income">آمدنی (Income)</option>
-                <option value="expense">خرچ (Expense)</option>
-            </select>
-        </div>
-        <button class="btn btn-primary" onclick="addTransaction()">شامل کریں</button>
-    </div>
-
-    <!-- History -->
-    <div class="history-card">
-        <h2 class="section-title">ٹرانزیکشن کی ہسٹری</h2>
-        <ul class="history-list" id="transaction-list"></ul>
-    </div>
-
-    <!-- Data Backup & Support Tools -->
-    <div class="form-card">
-        <h2 class="section-title">ڈیٹا بیک اپ اور سپورٹ</h2>
-        
-        <!-- Backup Section -->
-        <div class="grid-2" style="margin-bottom: 12px;">
-            <button class="btn btn-success" onclick="exportCSV()">Export CSV (بیک اپ)</button>
-            <button class="btn btn-outline" onclick="document.getElementById('csv-file').click()">Import CSV (بحال)</button>
-            <input type="file" id="csv-file" class="file-input" accept=".csv" onchange="importCSV(event)">
-        </div>
-
-        <!-- Feedback & WhatsApp Section -->
-        <div class="grid-2">
-            <button class="btn btn-whatsapp" onclick="openWhatsApp()">WhatsApp رابطہ</button>
-            <button class="btn btn-outline" onclick="openGoogleForm()">رائے / Feedback</button>
-        </div>
-    </div>
+    <title>FinanceFlow Pro - Personal Finance Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- html2pdf.js for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
-        const WHATSAPP_NUMBER = "923045544649"; 
-        const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScKYX-PGrE1e5DkpUEDCmbJIC7GMngNt1apFbZNFIvJ5LQfiQ/viewform?usp=dialog";
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        urdu: ['Noto Nastaliq Urdu', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
 
-        let transactions = JSON.parse(localStorage.getItem('ff_personal_transactions')) || [];
-
-        function updateUI() {
-            const list = document.getElementById('transaction-list');
-            list.innerHTML = '';
-
-            let income = 0;
-            let expense = 0;
-
-            transactions.forEach((item) => {
-                const li = document.createElement('li');
-                li.className = 'history-item';
-                
-                const val = parseFloat(item.amount);
-                if (item.type === 'income') income += val;
-                else expense += val;
-
-                li.innerHTML = `
-                    <span>${item.desc}</span>
-                    <span class="${item.type === 'income' ? 'income-text' : 'expense-text'}">
-                        ${item.type === 'income' ? '+' : '-'} RS ${val}
-                    </span>
-                `;
-                list.appendChild(li);
-            });
-
-            document.getElementById('total-income').innerText = `RS ${income}`;
-            document.getElementById('total-expense').innerText = `RS ${expense}`;
-            document.getElementById('total-balance').innerText = `RS ${income - expense}`;
-
-            localStorage.setItem('ff_personal_transactions', JSON.stringify(transactions));
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: pan-y;
         }
 
-        function addTransaction() {
-            const desc = document.getElementById('desc').value.trim();
-            const amount = document.getElementById('amount').value.trim();
-            const type = document.getElementById('type').value;
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(90px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+        .orb-1 { width: 350px; height: 350px; background: #6366f1; top: -50px; right: -50px; }
+        .orb-2 { width: 300px; height: 300px; background: #10b981; bottom: 5px; left: -50px; }
+        .orb-3 { width: 250px; height: 250px; background: #ec4899; top: 40%; right: 30%; }
 
-            if (!desc || !amount) {
-                alert('براہ کرم تمام تفصیلات درج کریں!');
-                return;
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-modal {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .glass-input {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-weight: 600;
+        }
+        .glass-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 4px; }
+    </style>
+</head>
+<body class="p-3 md:p-6 relative font-bold">
+
+    <!-- Ambient background lights -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10 space-y-6" id="dashboard-content">
+
+        <!-- HEADER -->
+        <header class="glass-card rounded-2xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-indigo-500 to-purple-500 p-3 rounded-xl shadow-lg">
+                    <i class="fa-solid fa-wallet text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">FinanceFlow Pro</h1>
+                    <p class="text-xs md:text-sm text-slate-300 font-semibold">پرسنل اکاؤنٹنگ، والیٹ اور لون منیجر</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+                <div class="flex items-center gap-2 bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700 text-xs text-slate-200 font-bold">
+                    <i class="fa-solid fa-coins text-amber-400"></i>
+                    <span>Currency:</span>
+                    <select id="currency-select" onchange="updateCurrency(this.value)" class="bg-transparent text-white font-extrabold focus:outline-none cursor-pointer">
+                        <option value="PKR" class="bg-slate-900">PKR (₨)</option>
+                        <option value="INR" class="bg-slate-900">INR (₹)</option>
+                        <option value="USD" class="bg-slate-900">USD ($)</option>
+                        <option value="EUR" class="bg-slate-900">EUR (€)</option>
+                        <option value="GBP" class="bg-slate-900">GBP (£)</option>
+                    </select>
+                </div>
+
+                <button onclick="openAccountModal()" class="flex-1 md:flex-none bg-purple-600 hover:bg-purple-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg">
+                    <i class="fa-solid fa-plus-circle"></i> ایڈ نیا اکاؤنٹ (JazzCash/Bank)
+                </button>
+                <button onclick="openTransactionModal('income')" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg">
+                    <i class="fa-solid fa-arrow-down"></i> Income (آمدن)
+                </button>
+                <button onclick="openTransactionModal('expense')" class="flex-1 md:flex-none bg-rose-600 hover:bg-rose-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg">
+                    <i class="fa-solid fa-arrow-up"></i> Expense (خرچ)
+                </button>
+                <button onclick="openLoanModal()" class="flex-1 md:flex-none bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg">
+                    <i class="fa-solid fa-hand-holding-dollar"></i> New Loan
+                </button>
+            </div>
+        </header>
+
+        <!-- BUDGET WARNING NOTIFICATION BANNER -->
+        <div id="budget-warning" class="hidden glass-card border-rose-500 bg-rose-950/80 p-4 rounded-2xl flex items-center justify-between gap-3 text-rose-100 animate-pulse shadow-2xl">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-2xl text-rose-400"></i>
+                <div>
+                    <h4 class="font-extrabold text-sm">بجٹ کی حد عبور ہو چکی ہے! (Budget Limit Exceeded)</h4>
+                    <p class="text-xs font-bold text-rose-200">آپ کے ماہانہ اخراجات مقررہ حد سے بڑھ گئے ہیں۔</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACCOUNTS / WALLETS SECTION (TOP PRIORITY) -->
+        <div class="glass-card p-5 rounded-2xl space-y-3 border-2 border-purple-500/40">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="font-extrabold text-white text-base">آپ کے تمام اکاؤنٹس اور والٹس (JazzCash, Ufone, Bank)</h3>
+                    <p class="text-xs font-bold text-slate-300">پہلے اکاؤنٹ بنائیں تاکہ پتہ چلے کس اکاؤنٹ سے کتنے پیسے نکالے یا ڈالے گئے ہیں</p>
+                </div>
+                <button onclick="openAccountModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-plus"></i> نیا اکاؤنٹ ایڈ کریں
+                </button>
+            </div>
+
+            <div id="accounts-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <!-- Dynamic Accounts rendered here -->
+            </div>
+        </div>
+
+        <!-- SUMMARY CARDS OVERVIEW -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+            <div class="glass-card p-4 rounded-2xl border-r-4 border-indigo-500">
+                <span class="text-xs font-bold text-slate-300">Total Balance</span>
+                <h3 id="total-balance" class="text-lg md:text-xl font-extrabold text-white">₨0.00</h3>
+                <p class="text-[10px] font-bold text-slate-400 mt-1">تمام والٹس کی کل رقم</p>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl border-r-4 border-emerald-500">
+                <span class="text-xs font-bold text-slate-300">Total Income</span>
+                <h3 id="total-income" class="text-lg md:text-xl font-extrabold text-emerald-400">₨0.00</h3>
+                <p class="text-[10px] font-bold text-slate-400 mt-1">کل وصول شدہ آمدن</p>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl border-r-4 border-rose-500">
+                <span class="text-xs font-bold text-slate-300">Total Expenses</span>
+                <h3 id="total-expenses" class="text-lg md:text-xl font-extrabold text-rose-400">₨0.00</h3>
+                <p class="text-[10px] font-bold text-slate-400 mt-1">کل کیے گئے اخراجات</p>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl border-r-4 border-amber-500">
+                <span class="text-xs font-bold text-slate-300">Savings Rate</span>
+                <h3 id="savings-rate" class="text-lg md:text-xl font-extrabold text-amber-300">0.0%</h3>
+                <p class="text-[10px] font-bold text-slate-400 mt-1">بچت کی شرح</p>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl border-r-4 border-orange-500">
+                <span class="text-xs font-bold text-slate-300">قرضہ دینا ہے</span>
+                <h3 id="loan-payable" class="text-lg md:text-xl font-extrabold text-orange-400">₨0.00</h3>
+                <p class="text-[10px] font-bold text-slate-400 mt-1">Borrowed Payable</p>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl border-r-4 border-cyan-500">
+                <span class="text-xs font-bold text-slate-300">قرضہ ملنا ہے</span>
+                <h3 id="loan-receivable" class="text-lg md:text-xl font-extrabold text-cyan-400">₨0.00</h3>
+                <p class="text-[10px] font-bold text-slate-400 mt-1">Given Receivable</p>
+            </div>
+        </div>
+
+        <!-- MONTHLY BUDGET SETTING -->
+        <div class="glass-card p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h4 class="font-extrabold text-white text-sm">ماہانہ بجٹ کی حد (Monthly Budget Limit)</h4>
+                <p class="text-xs font-bold text-slate-300">اگر کل خرچ اس حد سے اوپر گیا تو نوٹیفیکیشن ظاہر ہو گا</p>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <input type="number" id="budget-limit-input" placeholder="مثلاً: 5000" onchange="saveBudgetLimit()" class="glass-input px-3 py-1.5 rounded-xl text-xs w-full sm:w-40">
+                <span class="text-xs font-extrabold text-slate-300">سیٹ کریں</span>
+            </div>
+        </div>
+
+        <!-- MAIN TRANSACTIONS & LOANS GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- LOAN MANAGER -->
+            <div class="lg:col-span-5 glass-card p-5 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-extrabold text-white text-base flex items-center gap-2">
+                            <i class="fa-solid fa-hand-holding-dollar text-indigo-400"></i>
+                            قرضہ جات (Loan Manager)
+                        </h3>
+                        <button onclick="openLoanModal()" class="bg-indigo-600/40 hover:bg-indigo-600 border border-indigo-500 text-indigo-200 px-3 py-1.5 rounded-xl text-xs font-extrabold transition">
+                            <i class="fa-solid fa-plus text-[10px]"></i> نیا قرضہ
+                        </button>
+                    </div>
+
+                    <div id="loan-list" class="space-y-3 max-h-[460px] overflow-y-auto pl-1">
+                        <!-- Loan items -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECENT TRANSACTIONS TABLE -->
+            <div class="lg:col-span-7 glass-card p-5 rounded-2xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                    <div>
+                        <h3 class="font-extrabold text-white text-base">حالیہ لین دین (Transactions)</h3>
+                        <p class="text-xs font-bold text-slate-300">کس اکاؤنٹ سے پیسے آئے یا نکلے</p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                        <input type="text" id="search-input" onkeyup="filterTransactions()" placeholder="تلاش کریں..." class="glass-input text-xs px-3 py-1.5 rounded-xl flex-1 sm:w-32">
+                        <button onclick="exportCSV()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-extrabold shadow">CSV ایکسپورٹ</button>
+                        <button onclick="document.getElementById('csvFileInput').click()" class="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1.5 rounded-xl text-xs font-extrabold shadow">CSV امپورٹ</button>
+                        <input type="file" id="csvFileInput" style="display: none;" accept=".csv" onchange="importCSV(event)">
+                        <button onclick="exportPDF()" class="bg-rose-700 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl text-xs font-extrabold shadow">PDF</button>
+                        <button onclick="openResetModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-2.5 py-1.5 rounded-xl text-xs font-extrabold">ریسیٹ</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto max-h-[460px] overflow-y-auto">
+                    <table class="w-full text-right text-xs text-slate-200 font-bold">
+                        <thead class="text-slate-300 border-b border-slate-700 bg-slate-900/60 sticky top-0 backdrop-blur-md">
+                            <tr>
+                                <th class="p-2.5">تفصیل</th>
+                                <th class="p-2.5">اکاؤنٹ / والیٹ</th>
+                                <th class="p-2.5">کیٹیگری</th>
+                                <th class="p-2.5">تاریخ</th>
+                                <th class="p-2.5 text-left">رقم</th>
+                                <th class="p-2.5 text-center">ایکشن</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-list-body" class="divide-y divide-slate-800">
+                            <!-- Dynamic Transactions -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FOOTER LINKS (WhatsApp & Google Feedback Form) -->
+        <footer class="glass-card rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs font-bold text-slate-300">
+            <div>
+                <span>FinanceFlow Pro © 2026 - تمام حقوق محفوظ ہیں</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="https://wa.me/923045544649" target="_blank" class="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 transition">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp رابطہ
+                </a>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSfyS75gUKYN_dbFT5eMlRKQvoOHJt7JW6T1pbcOLWWljavHHg/viewform?usp=dialog" target="_blank" class="flex items-center gap-1.5 text-indigo-400 hover:text-indigo-300 transition">
+                    <i class="fa-solid fa-comment-dots text-sm"></i> فیڈ بیک اور ریٹنگ
+                </a>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ADD ACCOUNT MODAL -->
+    <div id="account-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+        <div class="glass-modal w-full max-w-md rounded-2xl p-6 relative shadow-2xl">
+            <button type="button" onclick="closeAccountModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-lg font-extrabold text-white mb-4">نیا اکاؤنٹ / والیٹ شامل کریں (مثلاً JazzCash)</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">اکاؤنٹ کا نام</label>
+                    <input type="text" id="acc-name" placeholder="مثلاً: JazzCash, Ufone, Bank..." class="w-full glass-input px-3 py-2 rounded-xl text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">ابتدائی رقم (Balance)</label>
+                    <input type="number" step="0.01" id="acc-balance" placeholder="0.00" class="w-full glass-input px-3 py-2 rounded-xl text-sm">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeAccountModal()" class="px-4 py-2 rounded-xl text-xs font-extrabold text-slate-300 hover:bg-slate-800">منسوخ</button>
+                    <button type="button" onclick="saveNewAccount()" class="px-5 py-2 rounded-xl text-xs font-extrabold bg-purple-600 hover:bg-purple-500 text-white shadow-lg">اکاؤنٹ محفوظ کریں</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRANSACTION MODAL (Income / Expense) -->
+    <div id="tx-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+        <div class="glass-modal w-full max-w-md rounded-2xl p-6 relative shadow-2xl">
+            <button type="button" onclick="closeTransactionModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 id="tx-modal-title" class="text-lg font-extrabold text-white mb-4">لین دین کا اندراج</h3>
+            
+            <div class="space-y-4">
+                <input type="hidden" id="tx-id">
+                
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">لین دین کی قسم</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" id="tx-type-income-btn" onclick="setTxModalType('income')" class="py-2 rounded-xl text-xs font-extrabold border transition border-emerald-500 bg-emerald-500/20 text-emerald-300">
+                            Income (آمدن)
+                        </button>
+                        <button type="button" id="tx-type-expense-btn" onclick="setTxModalType('expense')" class="py-2 rounded-xl text-xs font-extrabold border transition border-slate-700 text-slate-400">
+                            Expense (خرچ)
+                        </button>
+                    </div>
+                    <input type="hidden" id="tx-type" value="income">
+                </div>
+
+                <div>
+                    <label id="account-select-label" class="block text-xs font-extrabold text-slate-200 mb-1">کس اکاؤنٹ سے پیسے آئے یا نکلے؟</label>
+                    <select id="tx-account" class="w-full glass-input px-3 py-2 rounded-xl text-sm text-white font-extrabold">
+                        <!-- Dynamic Account Options -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">رقم (Amount)</label>
+                    <input type="number" step="0.01" id="tx-amount" placeholder="0.00" class="w-full glass-input px-3 py-2 rounded-xl text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">تفصیل (Description)</label>
+                    <input type="text" id="tx-desc" placeholder="مثلاً: دکان کا سامان، بل..." class="w-full glass-input px-3 py-2 rounded-xl text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">کیٹیگری</label>
+                    <select id="tx-category" class="w-full glass-input px-3 py-2 rounded-xl text-sm text-white font-extrabold">
+                        <option value="Food & Dining" class="bg-slate-900">خوراک و کھانا</option>
+                        <option value="Bills & Utilities" class="bg-slate-900">یوٹیلیٹی بلز</option>
+                        <option value="Shopping" class="bg-slate-900">شاپنگ</option>
+                        <option value="Transport & Fuel" class="bg-slate-900">سفر و پٹرول</option>
+                        <option value="Salary / Earnings" class="bg-slate-900">تنخواہ / آمدن</option>
+                        <option value="Other / General" class="bg-slate-900" selected>دیگر / عام</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">تاریخ</label>
+                    <input type="date" id="tx-date" class="w-full glass-input px-3 py-2 rounded-xl text-sm">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeTransactionModal()" class="px-4 py-2 rounded-xl text-xs font-extrabold text-slate-300 hover:bg-slate-800">منسوخ</button>
+                    <button type="button" onclick="saveNewTransaction()" class="px-5 py-2 rounded-xl text-xs font-extrabold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg">محفوظ کریں</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOAN MODAL -->
+    <div id="loan-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+        <div class="glass-modal w-full max-w-md rounded-2xl p-6 relative shadow-2xl">
+            <button type="button" onclick="closeLoanModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 id="loan-modal-title" class="text-lg font-extrabold text-white mb-4">قرض کا اندراج</h3>
+            
+            <div class="space-y-4">
+                <input type="hidden" id="loan-id">
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">قرض کی قسم</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" id="loan-type-borrowed-btn" onclick="setLoanModalType('borrowed')" class="py-2 rounded-xl text-xs font-extrabold border transition border-orange-500 bg-orange-500/20 text-orange-300">
+                            قرض لیا (Borrowed)
+                        </button>
+                        <button type="button" id="loan-type-given-btn" onclick="setLoanModalType('given')" class="py-2 rounded-xl text-xs font-extrabold border transition border-slate-700 text-slate-400">
+                            قرض دیا (Given)
+                        </button>
+                    </div>
+                    <input type="hidden" id="loan-type" value="borrowed">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">شخص کا نام</label>
+                    <input type="text" id="loan-person" placeholder="نام درج کریں..." class="w-full glass-input px-3 py-2 rounded-xl text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">کل رقم</label>
+                    <input type="number" step="0.01" id="loan-amount" placeholder="0.00" class="w-full glass-input px-3 py-2 rounded-xl text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">تاریخ</label>
+                    <input type="date" id="loan-date" class="w-full glass-input px-3 py-2 rounded-xl text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">تفصیل / نوٹس</label>
+                    <input type="text" id="loan-note" placeholder="تفصیل..." class="w-full glass-input px-3 py-2 rounded-xl text-sm">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeLoanModal()" class="px-4 py-2 rounded-xl text-xs font-extrabold text-slate-300 hover:bg-slate-800">منسوخ</button>
+                    <button type="button" onclick="saveNewLoan()" class="px-5 py-2 rounded-xl text-xs font-extrabold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg">قرض محفوظ کریں</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REPAYMENT MODAL -->
+    <div id="repay-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+        <div class="glass-modal w-full max-w-sm rounded-2xl p-6 relative shadow-2xl">
+            <button type="button" onclick="closeRepayModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-lg font-extrabold text-white mb-1">قرض کی ادائیگی درج کریں</h3>
+            <p id="repay-subtitle" class="text-xs font-bold text-slate-300 mb-4">ادائیگی یا وصولی درج کریں</p>
+            
+            <div class="space-y-4">
+                <input type="hidden" id="repay-loan-id">
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">ادائیگی کی رقم</label>
+                    <input type="number" step="0.01" id="repay-amount" placeholder="0.00" class="w-full glass-input px-3 py-2 rounded-xl text-sm">
+                    <p id="repay-max-hint" class="text-[10px] font-bold text-slate-300 mt-1">باقی رقم: ₨0.00</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-200 mb-1">کس اکاؤنٹ سے ادائیگی کی؟</label>
+                    <select id="repay-account" class="w-full glass-input px-3 py-2 rounded-xl text-sm text-white font-extrabold">
+                        <!-- Dynamic Account Options -->
+                    </select>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeRepayModal()" class="px-4 py-2 rounded-xl text-xs font-extrabold text-slate-300 hover:bg-slate-800">منسوخ</button>
+                    <button type="button" onclick="saveNewRepayment()" class="px-5 py-2 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg">تصدیق کریں</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESET CONFIRMATION MODAL -->
+    <div id="reset-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+        <div class="glass-modal w-full max-w-sm rounded-2xl p-6 text-center space-y-4">
+            <div class="w-12 h-12 bg-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mx-auto text-xl border border-rose-500/30">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-extrabold text-white">تمام ڈیٹا ری سیٹ کریں؟</h3>
+            <p class="text-xs font-bold text-slate-300">اس سے آپ کے تمام اکاؤنٹس اور ریکارڈ ختم ہو جائیں گے۔</p>
+            <div class="flex gap-2 justify-center pt-2">
+                <button type="button" onclick="closeResetModal()" class="px-4 py-2 rounded-xl text-xs font-extrabold text-slate-300 bg-slate-800 hover:bg-slate-700">منسوخ</button>
+                <button type="button" onclick="confirmResetAll()" class="px-4 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white">ہاں، سب ختم کریں</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION LOGIC JS -->
+    <script>
+        let state = {
+            currency: 'PKR',
+            budgetLimit: 5000,
+            accounts: [],
+            transactions: [],
+            loans: []
+        };
+
+        const CURRENCY_SYMBOLS = {
+            PKR: '₨',
+            INR: '₹',
+            USD: '$',
+            EUR: '€',
+            GBP: '£'
+        };
+
+        window.onload = function() {
+            loadFromLocalStorage();
+            document.getElementById('budget-limit-input').value = state.budgetLimit;
+            updateUI();
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tx-date').value = today;
+            document.getElementById('loan-date').value = today;
+        };
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('financeflow_pro_data');
+            if (saved) {
+                try {
+                    state = JSON.parse(saved);
+                } catch(e) {
+                    console.error("Storage corrupt", e);
+                }
             }
+        }
 
-            transactions.push({ desc, amount: parseFloat(amount), type });
-            document.getElementById('desc').value = '';
-            document.getElementById('amount').value = '';
+        function saveToLocalStorage() {
+            localStorage.setItem('financeflow_pro_data', JSON.stringify(state));
+        }
+
+        function formatCurr(amount) {
+            const sym = CURRENCY_SYMBOLS[state.currency] || '₨';
+            return `${sym}${parseFloat(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        function updateCurrency(val) {
+            state.currency = val;
+            saveToLocalStorage();
             updateUI();
         }
 
-        function exportCSV() {
-            if (transactions.length === 0) {
-                alert('ڈیٹا بیس میں کوئی انٹری موجود نہیں ہے!');
+        function saveBudgetLimit() {
+            const val = parseFloat(document.getElementById('budget-limit-input').value) || 0;
+            state.budgetLimit = val;
+            saveToLocalStorage();
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('currency-select').value = state.currency;
+
+            let totalIncome = 0;
+            let totalExpense = 0;
+
+            state.transactions.forEach(t => {
+                if (t.type === 'income') totalIncome += t.amount;
+                if (t.type === 'expense') totalExpense += t.amount;
+            });
+
+            let totalBalance = state.accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
+            const savingsRate = totalIncome > 0 ? Math.max(0, ((totalIncome - totalExpense) / totalIncome) * 100) : 0;
+
+            let loanPayable = 0;
+            let loanReceivable = 0;
+
+            state.loans.forEach(l => {
+                const remaining = Math.max(0, l.amount - (l.repaid || 0));
+                if (l.type === 'borrowed') {
+                    loanPayable += remaining;
+                } else {
+                    loanReceivable += remaining;
+                }
+            });
+
+            document.getElementById('total-balance').innerText = formatCurr(totalBalance);
+            document.getElementById('total-income').innerText = formatCurr(totalIncome);
+            document.getElementById('total-expenses').innerText = formatCurr(totalExpense);
+            document.getElementById('savings-rate').innerText = `${savingsRate.toFixed(1)}%`;
+            document.getElementById('loan-payable').innerText = formatCurr(loanPayable);
+            document.getElementById('loan-receivable').innerText = formatCurr(loanReceivable);
+
+            // Budget Notification Warning Check
+            const warningBanner = document.getElementById('budget-warning');
+            if (state.budgetLimit > 0 && totalExpense > state.budgetLimit) {
+                warningBanner.classList.remove('hidden');
+            } else {
+                warningBanner.classList.add('hidden');
+            }
+
+            renderAccountsGrid();
+            renderLoanList();
+            renderTransactionList();
+        }
+
+        // ACCOUNTS / WALLETS MANAGEMENT
+        function openAccountModal() {
+            document.getElementById('acc-name').value = '';
+            document.getElementById('acc-balance').value = '';
+            document.getElementById('account-modal').classList.remove('hidden');
+        }
+
+        function closeAccountModal() {
+            document.getElementById('account-modal').classList.add('hidden');
+        }
+
+        function saveNewAccount() {
+            const name = document.getElementById('acc-name').value.trim();
+            const balance = parseFloat(document.getElementById('acc-balance').value) || 0;
+
+            if (!name) {
+                alert("براہ کرم اکاؤنٹ کا نام درج کریں!");
                 return;
             }
 
-            let csvContent = "data:text/csv;charset=utf-8,Description,Amount,Type\n";
-            transactions.forEach(t => {
-                csvContent += `"${t.desc}",${t.amount},${t.type}\n`;
+            const newAcc = {
+                id: Date.now().toString(),
+                name: name,
+                balance: balance
+            };
+
+            state.accounts.push(newAcc);
+            saveToLocalStorage();
+            updateUI();
+            closeAccountModal();
+        }
+
+        function deleteAccount(id) {
+            state.accounts = state.accounts.filter(a => a.id !== id);
+            saveToLocalStorage();
+            updateUI();
+        }
+
+        function renderAccountsGrid() {
+            const grid = document.getElementById('accounts-grid');
+            if (!state.accounts || state.accounts.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-6 text-slate-400 font-bold">
+                        <p class="text-xs">کوئی اکاؤنٹ موجود نہیں ہے۔ اوپر دیے گئے بٹن سے نیا اکاؤنٹ (جیسے JazzCash) ایڈ کریں!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = state.accounts.map(acc => `
+                <div class="glass-card p-4 rounded-xl flex justify-between items-center border border-purple-500/30 shadow-lg">
+                    <div>
+                        <h4 class="font-extrabold text-sm text-white"><i class="fa-solid fa-wallet text-purple-400 ml-1.5"></i>${acc.name}</h4>
+                        <p class="text-xs font-extrabold text-emerald-400 mt-1">${formatCurr(acc.balance)}</p>
+                    </div>
+                    <button type="button" onclick="deleteAccount('${acc.id}')" class="text-slate-400 hover:text-rose-400 p-2 text-xs" title="حذف کریں">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function populateAccountSelect(selectId) {
+            const select = document.getElementById(selectId);
+            if (!state.accounts || state.accounts.length === 0) {
+                select.innerHTML = `<option value="">کوئی اکاؤنٹ موجود نہیں ہے! پہلے نیا اکاؤنٹ ایڈ کریں</option>`;
+                return;
+            }
+
+            select.innerHTML = state.accounts.map(acc => `
+                <option value="${acc.id}" class="bg-slate-900">${acc.name} (باقی: ${formatCurr(acc.balance)})</option>
+            `).join('');
+        }
+
+        // TRANSACTION MODAL LOGIC
+        function openTransactionModal(type = 'income') {
+            if (!state.accounts || state.accounts.length === 0) {
+                alert("براہ کرم پہلے کم از کم ایک اکاؤنٹ (مثلاً JazzCash) ایڈ کریں!");
+                openAccountModal();
+                return;
+            }
+
+            document.getElementById('tx-id').value = '';
+            document.getElementById('tx-amount').value = '';
+            document.getElementById('tx-desc').value = '';
+            document.getElementById('tx-modal-title').innerText = type === 'income' ? 'آمدن کا اندراج (کس اکاؤنٹ میں آئے؟)' : 'خرچ کا اندراج (کس اکاؤنٹ سے نکلے؟)';
+            
+            populateAccountSelect('tx-account');
+            setTxModalType(type);
+            document.getElementById('tx-modal').classList.remove('hidden');
+        }
+
+        function closeTransactionModal() {
+            document.getElementById('tx-modal').classList.add('hidden');
+        }
+
+        function setTxModalType(type) {
+            document.getElementById('tx-type').value = type;
+            const incBtn = document.getElementById('tx-type-income-btn');
+            const expBtn = document.getElementById('tx-type-expense-btn');
+
+            if (type === 'income') {
+                incBtn.className = 'py-2 rounded-xl text-xs font-extrabold border transition border-emerald-500 bg-emerald-500/20 text-emerald-300';
+                expBtn.className = 'py-2 rounded-xl text-xs font-extrabold border transition border-slate-700 text-slate-400';
+                document.getElementById('account-select-label').innerText = 'کس اکاؤنٹ میں پیسے جمع ہوئے؟';
+            } else {
+                expBtn.className = 'py-2 rounded-xl text-xs font-extrabold border transition border-rose-500 bg-rose-500/20 text-rose-300';
+                incBtn.className = 'py-2 rounded-xl text-xs font-extrabold border transition border-slate-700 text-slate-400';
+                document.getElementById('account-select-label').innerText = 'کس اکاؤنٹ سے پیسے خرچ ہوئے؟';
+            }
+        }
+
+        function saveNewTransaction() {
+            const id = document.getElementById('tx-id').value || Date.now().toString();
+            const type = document.getElementById('tx-type').value;
+            const accountId = document.getElementById('tx-account').value;
+            const amount = parseFloat(document.getElementById('tx-amount').value) || 0;
+            const desc = document.getElementById('tx-desc').value.trim();
+            const category = document.getElementById('tx-category').value;
+            const date = document.getElementById('tx-date').value;
+
+            if (!accountId) {
+                alert("براہ کرم اکاؤنٹ منتخب کریں!");
+                return;
+            }
+            if (amount <= 0) {
+                alert("براہ کرم درست رقم درج کریں!");
+                return;
+            }
+
+            const account = state.accounts.find(a => a.id === accountId);
+            if (!account) {
+                alert("اکاؤنٹ نہیں ملا!");
+                return;
+            }
+
+            if (type === 'income') {
+                account.balance += amount;
+            } else {
+                account.balance -= amount;
+            }
+
+            const item = { id, type, accountId, accountName: account.name, amount, desc, category, date };
+            state.transactions.unshift(item);
+
+            saveToLocalStorage();
+            updateUI();
+            closeTransactionModal();
+        }
+
+        function renderTransactionList() {
+            const body = document.getElementById('transaction-list-body');
+            const searchVal = (document.getElementById('search-input').value || '').toLowerCase();
+
+            const filtered = state.transactions.filter(t => 
+                t.desc.toLowerCase().includes(searchVal) || 
+                (t.accountName && t.accountName.toLowerCase().includes(searchVal)) ||
+                t.category.toLowerCase().includes(searchVal)
+            );
+
+            if (filtered.length === 0) {
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-slate-400 font-bold">
+                            <p class="text-xs">کوئی لین دین کا ریکارڈ موجود نہیں ہے</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            body.innerHTML = filtered.map(t => {
+                const isInc = t.type === 'income';
+                const amtClass = isInc ? 'text-emerald-400 font-extrabold' : 'text-rose-400 font-extrabold';
+                const sign = isInc ? '+' : '-';
+
+                return `
+                    <tr class="hover:bg-slate-800/50 transition">
+                        <td class="p-2.5 font-extrabold text-white">${t.desc}</td>
+                        <td class="p-2.5 text-slate-200"><span class="bg-purple-950/80 text-purple-200 px-2.5 py-1 rounded-lg border border-purple-500/30">${t.accountName || 'عام'}</span></td>
+                        <td class="p-2.5 text-slate-300">${t.category}</td>
+                        <td class="p-2.5 text-slate-300 text-[11px]">${t.date}</td>
+                        <td class="p-2.5 text-left ${amtClass}">${sign}${formatCurr(t.amount)}</td>
+                        <td class="p-2.5 text-center">
+                            <button type="button" onclick="deleteTransaction('${t.id}')" class="p-1.5 text-slate-400 hover:text-rose-400">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterTransactions() {
+            renderTransactionList();
+        }
+
+        function deleteTransaction(id) {
+            const tx = state.transactions.find(t => t.id === id);
+            if (tx && tx.accountId) {
+                const acc = state.accounts.find(a => a.id === tx.accountId);
+                if (acc) {
+                    if (tx.type === 'income') acc.balance -= tx.amount;
+                    else acc.balance += tx.amount;
+                }
+            }
+            state.transactions = state.transactions.filter(t => t.id !== id);
+            saveToLocalStorage();
+            updateUI();
+        }
+
+        // LOAN MANAGEMENT
+        function openLoanModal() {
+            document.getElementById('loan-id').value = '';
+            document.getElementById('loan-person').value = '';
+            document.getElementById('loan-amount').value = '';
+            document.getElementById('loan-note').value = '';
+            setLoanModalType('borrowed');
+            document.getElementById('loan-modal').classList.remove('hidden');
+        }
+
+        function closeLoanModal() {
+            document.getElementById('loan-modal').classList.add('hidden');
+        }
+
+        function setLoanModalType(type) {
+            document.getElementById('loan-type').value = type;
+            const borBtn = document.getElementById('loan-type-borrowed-btn');
+            const givBtn = document.getElementById('loan-type-given-btn');
+
+            if (type === 'borrowed') {
+                borBtn.className = 'py-2 rounded-xl text-xs font-extrabold border transition border-orange-500 bg-orange-500/20 text-orange-300';
+                givBtn.className = 'py-2 rounded-xl text-xs font-extrabold border transition border-slate-700 text-slate-400';
+            } else {
+                givBtn.className = 'py-2 rounded-xl text-xs font-extrabold border transition border-cyan-500 bg-cyan-500/20 text-cyan-300';
+                borBtn.className = 'py-2 rounded-xl text-xs font-extrabold border transition border-slate-700 text-slate-400';
+            }
+        }
+
+        function saveNewLoan() {
+            const id = document.getElementById('loan-id').value || Date.now().toString();
+            const type = document.getElementById('loan-type').value;
+            const person = document.getElementById('loan-person').value.trim();
+            const amount = parseFloat(document.getElementById('loan-amount').value) || 0;
+            const date = document.getElementById('loan-date').value;
+            const note = document.getElementById('loan-note').value.trim();
+
+            if (!person || amount <= 0) {
+                alert("براہ کرم نام اور درست رقم درج کریں!");
+                return;
+            }
+
+            const loanObj = { id, type, person, amount, repaid: 0, date, note };
+            state.loans.unshift(loanObj);
+
+            saveToLocalStorage();
+            updateUI();
+            closeLoanModal();
+        }
+
+        function renderLoanList() {
+            const container = document.getElementById('loan-list');
+            if (state.loans.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-slate-400 font-bold">
+                        <p class="text-xs">کوئی قرض کا ریکارڈ موجود نہیں ہے</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = state.loans.map(loan => {
+                const repaid = loan.repaid || 0;
+                const remaining = Math.max(0, loan.amount - repaid);
+                const isBorrowed = loan.type === 'borrowed';
+                const badgeClass = isBorrowed ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+                const typeText = isBorrowed ? 'قرض لیا (Borrowed)' : 'قرض دیا (Given)';
+
+                return `
+                    <div class="glass-card p-4 rounded-xl border border-slate-700 space-y-2 shadow-lg">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="px-2.5 py-1 text-[10px] rounded-md font-extrabold border ${badgeClass}">${typeText}</span>
+                                <h4 class="font-extrabold text-sm text-white mt-1.5">${loan.person}</h4>
+                                <p class="text-[10px] font-bold text-slate-300">${loan.date} ${loan.note ? '• ' + loan.note : ''}</p>
+                            </div>
+                            <button type="button" onclick="deleteLoan('${loan.id}')" class="text-slate-400 hover:text-rose-400 p-1 text-xs">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-1 bg-slate-900/80 p-2.5 rounded-lg text-center text-xs">
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 block">کل رقم</span>
+                                <span class="font-extrabold text-white">${formatCurr(loan.amount)}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 block">ادائیگی</span>
+                                <span class="font-extrabold text-emerald-400">${formatCurr(repaid)}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 block">باقی رقم</span>
+                                <span class="font-extrabold ${remaining > 0 ? 'text-amber-400' : 'text-slate-400'}">${formatCurr(remaining)}</span>
+                            </div>
+                        </div>
+
+                        ${remaining > 0 ? `
+                            <button type="button" onclick="openRepayModal('${loan.id}')" class="w-full text-xs bg-emerald-600/40 hover:bg-emerald-600 text-emerald-200 border border-emerald-500/50 py-2 rounded-lg transition font-extrabold shadow">
+                                ادائیگی درج کریں
+                            </button>
+                        ` : '<div class="text-emerald-400 text-xs text-center font-extrabold"><i class="fa-solid fa-circle-check"></i> مکمل ادا ہو گیا</div>'}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function deleteLoan(id) {
+            state.loans = state.loans.filter(l => l.id !== id);
+            saveToLocalStorage();
+            updateUI();
+        }
+
+        // REPAYMENT LOGIC
+        function openRepayModal(loanId) {
+            if (!state.accounts || state.accounts.length === 0) {
+                alert("براہ کرم پہلے کم از کم ایک اکاؤنٹ ایڈ کریں!");
+                openAccountModal();
+                return;
+            }
+
+            const loan = state.loans.find(l => l.id === loanId);
+            if (!loan) return;
+
+            const remaining = Math.max(0, loan.amount - (loan.repaid || 0));
+            document.getElementById('repay-loan-id').value = loan.id;
+            document.getElementById('repay-amount').value = '';
+            document.getElementById('repay-amount').max = remaining;
+            document.getElementById('repay-subtitle').innerText = `${loan.person} کے لیے ادائیگی درج کریں`;
+            document.getElementById('repay-max-hint').innerText = `باقی رقم: ${formatCurr(remaining)}`;
+
+            populateAccountSelect('repay-account');
+            document.getElementById('repay-modal').classList.remove('hidden');
+        }
+
+        function closeRepayModal() {
+            document.getElementById('repay-modal').classList.add('hidden');
+        }
+
+        function saveNewRepayment() {
+            const loanId = document.getElementById('repay-loan-id').value;
+            const repayAmt = parseFloat(document.getElementById('repay-amount').value) || 0;
+            const accountId = document.getElementById('repay-account').value;
+
+            const loan = state.loans.find(l => l.id === loanId);
+            const account = state.accounts.find(a => a.id === accountId);
+
+            if (!loan || !account || repayAmt <= 0) {
+                alert("براہ کرم درست رقم اور اکاؤنٹ منتخب کریں!");
+                return;
+            }
+
+            loan.repaid = (loan.repaid || 0) + repayAmt;
+
+            const isBorrowed = loan.type === 'borrowed';
+            if (isBorrowed) {
+                account.balance -= repayAmt;
+            } else {
+                account.balance += repayAmt;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            state.transactions.unshift({
+                id: Date.now().toString(),
+                type: isBorrowed ? 'expense' : 'income',
+                accountId: account.id,
+                accountName: account.name,
+                amount: repayAmt,
+                desc: `${isBorrowed ? 'قرض کی ادائیگی بحساب' : 'قرض کی وصولی از'}: ${loan.person}`,
+                category: 'دیگر / عام',
+                date: today
             });
+
+            saveToLocalStorage();
+            updateUI();
+            closeRepayModal();
+        }
+
+        // EXPORTS & IMPORTS (CSV & PDF) - UPDATED TO EXPORT ALWAYS
+        function exportCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,ID,Type,Account,Amount,Description,Category,Date\n";
+            
+            if (state.transactions && state.transactions.length > 0) {
+                state.transactions.forEach(t => {
+                    csvContent += `"${t.id}","${t.type}","${t.accountName || ''}","${t.amount}","${t.desc.replace(/"/g, '""')}","${t.category}","${t.date}"\n`;
+                });
+            }
 
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `FinancePersonal_Backup_${new Date().toISOString().slice(0,10)}.csv`);
+            link.setAttribute("download", `FinanceFlow_Report_${new Date().toISOString().split('T')[0]}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -321,43 +1001,69 @@
             reader.onload = function(e) {
                 const text = e.target.result;
                 const lines = text.split('\n');
-                let imported = [];
+                let importedCount = 0;
 
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
-                    if (line) {
-                        const parts = line.split(',');
-                        if (parts.length >= 3) {
-                            const desc = parts[0].replace(/"/g, '');
-                            const amount = parseFloat(parts[1]);
-                            const type = parts[2].trim();
-                            if (desc && !isNaN(amount)) {
-                                imported.push({ desc, amount, type });
-                            }
+                    if (!line) continue;
+                    
+                    const parts = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+                    if (parts.length >= 7) {
+                        const id = parts[0].replace(/"/g, '');
+                        const type = parts[1].replace(/"/g, '');
+                        const accountName = parts[2].replace(/"/g, '');
+                        const amount = parseFloat(parts[3].replace(/"/g, '')) || 0;
+                        const desc = parts[4].replace(/"/g, '');
+                        const category = parts[5].replace(/"/g, '');
+                        const date = parts[6].replace(/"/g, '');
+
+                        if (!state.transactions.some(t => t.id === id)) {
+                            state.transactions.push({ id, type, accountName, amount, desc, category, date });
+                            importedCount++;
                         }
                     }
                 }
 
-                if (imported.length > 0) {
-                    transactions = imported;
-                    updateUI();
-                    alert('ڈیٹا کامیابی سے بحال (Restore) ہو گیا ہے!');
-                } else {
-                    alert('فائل کا فارمیٹ درست نہیں ہے!');
-                }
+                saveToLocalStorage();
+                updateUI();
+                alert(`${importedCount} ریکارڈز کامیابی سے امپورٹ ہو گئے ہیں!`);
+                event.target.value = '';
             };
             reader.readAsText(file);
         }
 
-        function openWhatsApp() {
-            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=سلام!%20میں%20FinanceFlow%20Personal%20Report%20کے%20بارے%20میں%20رابطہ%20کرنا%20چاہता%20ہوں۔`, '_blank');
+        function exportPDF() {
+            const element = document.getElementById('dashboard-content');
+            const opt = {
+                margin:       0.3,
+                filename:     `FinanceFlow_Report_${new Date().toISOString().split('T')[0]}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, backgroundColor: '#0b0f19' },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(element).save();
         }
 
-        function openGoogleForm() {
-            window.open(GOOGLE_FORM_URL, '_blank');
+        function openResetModal() {
+            document.getElementById('reset-modal').classList.remove('hidden');
         }
 
-        updateUI();
+        function closeResetModal() {
+            document.getElementById('reset-modal').classList.add('hidden');
+        }
+
+        function confirmResetAll() {
+            state = {
+                currency: 'PKR',
+                budgetLimit: 5000,
+                accounts: [],
+                transactions: [],
+                loans: []
+            };
+            saveToLocalStorage();
+            updateUI();
+            closeResetModal();
+        }
     </script>
 </body>
 </html>
