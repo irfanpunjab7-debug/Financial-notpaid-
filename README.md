@@ -1,2 +1,1 @@
-# temporary off please wait...
-OFF.   PAGE 
+# temporary off please wait...off page
